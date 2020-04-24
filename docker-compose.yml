@@ -1,0 +1,19 @@
+version: "3"
+networks:
+  service:
+    driver: bridge
+
+services:
+  nexus:
+    build: 
+      context: ./nexus
+    container_name: nexus
+    volumes:
+      - ${NEXUS_REPOSITORY_LOCAL_DIR}:/nexus-data
+    ports:
+      - "${NEXUS_WEB_PORT}:8081"
+      - "${NEXUS_DOCKER_HOST_PORT}:8082"
+      - "${NEXUS_DOCKER_PROXY_PORT}:8083"
+      - "${NEXUS_DOCKER_GROUP_PORT}:8084"
+    networks:
+      - service
