@@ -8,6 +8,7 @@ services:
     build: 
       context: ./nexus
     container_name: nexus
+    hostname: 'www.nexus.localhost'
     volumes:
       - ${NEXUS_REPOSITORY_LOCAL_DIR}:/nexus-data
     ports:
@@ -15,5 +16,47 @@ services:
       - "${NEXUS_DOCKER_HOST_PORT}:8082"
       - "${NEXUS_DOCKER_PROXY_PORT}:8083"
       - "${NEXUS_DOCKER_GROUP_PORT}:8084"
+    networks:
+      - service
+  
+  jenkins:
+    build:
+      context: ./jenkins
+    container_name: jenkins
+    hostname: 'www.jenkins.localhost'
+    volumes:
+      - ${JENKINS_DATA_LOCAL_DIR}:/var/jenkins_home
+    ports:
+      - "${JENKINS_PORT}:8080"
+    networks:
+      - service
+
+  gitlab:
+    build:
+      context: ./gitlab
+    container_name: gitlab
+    hostname: 'www.gitlab.localhost'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        # Add any other gitlab.rb configuration here, each on its own line
+        external_url 'http://${HOST_IP}'
+        gitlab_rails['gitlab_shell_ssh_port'] = ${GITLAB_SSH_PORT}
+        gitlab_rails['gitlab_ssh_host'] = '${HOST_IP}'
+        registry_external_url "https://www.gitlab.localhost:${GITLAB_REGISTRY_PORT}"  # ContainerRegistry的外部访问地址
+        gitlab_rails['registry_host'] = "www.gitlab.localhost"
+        gitlab_rails['registry_port'] = ${GITLAB_REGISTRY_PORT}
+        gitlab_rails['registry_api_url'] = "http://localhost:5000"
+        gitlab_rails['gitlab_default_projects_features_builds'] = false
+        gitlab_rails['gitlab_default_projects_features_container_registry'] = false
+          registry_nginx['ssl_certificate'] = "/etc/gitlab/ssl/domain.crt"
+        registry_nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/domain.key"
+    volumes:
+      - ${GITLAB_DATA_LOCAL_DIR}:/var/opt/gitlab
+      - ${GITLAB_CONFIG_LOCAL_DIR}:/etc/gitlab
+    ports:
+      - "${GITLAB_PORT}:80"
+      - "${GITLAB_SSL_PORT}:443"
+      - "${GITLAB_SSH_PORT}:22"
+      - "${GITLAB_REGISTRY_PORT}:${GITLAB_REGISTRY_PORT}"
     networks:
       - service

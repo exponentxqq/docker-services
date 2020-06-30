@@ -1,3 +1,6 @@
 nexus/repository/*
 /**/.idea
 /**/.vscode
+gitlab/data
+gitlab/config
+jenkins/data
