@@ -60,3 +60,15 @@ services:
       - "${GITLAB_REGISTRY_PORT}:${GITLAB_REGISTRY_PORT}"
     networks:
       - service
+
+  pdf:
+    build: 
+      context: ./pdf
+    container_name: pdf
+    working_dir: ${PDF_DATA_CONTAINER_PATH}
+    hostname: 'www.pdf.localhost'
+    tty: true
+    volumes:
+      - ${PDF_DATA_LOCAL_PATH}:${PDF_DATA_CONTAINER_PATH}
+    networks:
+      - service

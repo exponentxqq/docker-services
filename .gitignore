@@ -4,3 +4,5 @@ nexus/repository/*
 gitlab/data
 gitlab/config
 jenkins/data
+.env
+service.iml
