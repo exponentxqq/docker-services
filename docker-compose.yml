@@ -1,7 +1,10 @@
-version: "3"
+version: "3.3"
 networks:
   service:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
 
 services:
   nexus:
@@ -17,7 +20,8 @@ services:
       - "${NEXUS_DOCKER_PROXY_PORT}:8083"
       - "${NEXUS_DOCKER_GROUP_PORT}:8084"
     networks:
-      - service
+      service:
+        ipv4_address: 172.18.0.1
   
   jenkins:
     build:
@@ -29,7 +33,8 @@ services:
     ports:
       - "${JENKINS_PORT}:8080"
     networks:
-      - service
+      service:
+        ipv4_address: 172.18.0.2
 
   gitlab:
     build:
@@ -59,16 +64,21 @@ services:
       - "${GITLAB_SSH_PORT}:22"
       - "${GITLAB_REGISTRY_PORT}:${GITLAB_REGISTRY_PORT}"
     networks:
-      - service
+      service:
+        ipv4_address: 172.18.0.3
 
   pdf:
     build: 
       context: ./pdf
+      args:
+        - USER_ID=${USER_ID}
     container_name: pdf
+    user: ${USER_ID}:${USER_ID}
     working_dir: ${PDF_DATA_CONTAINER_PATH}
     hostname: 'www.pdf.localhost'
     tty: true
     volumes:
       - ${PDF_DATA_LOCAL_PATH}:${PDF_DATA_CONTAINER_PATH}
     networks:
-      - service
+      service:
+        ipv4_address: 172.18.0.4

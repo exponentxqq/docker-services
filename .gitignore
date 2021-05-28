@@ -6,3 +6,4 @@ gitlab/config
 jenkins/data
 .env
 service.iml
+/**/data
