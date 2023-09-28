@@ -1,0 +1,50 @@
+version: "3.5"
+
+services:
+  master1:
+    build:
+      dockerfile: ./Dockerfile
+      args:
+        - MYSQL_IMAGE=${MYSQL_IMAGE}
+        - MYSQL_VERSION=${MYSQL_VERSION}
+    container_name: mysql-master
+    image: service-mysql-cluster:${MYSQL_VERSION}
+    environment:
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - TZ=${TIMEZONE}
+    volumes:
+      - ${MYSQL_HOST_MASTER1_DATA_PATH}:${MYSQL_CONTAINER_DATA_PATH}
+      - ${MYSQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
+      - ./conf/master1.cnf:/etc/mysql/conf.d/my.cnf
+    # 降低mysql容器的内存占用
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 26677
+        hard: 46677
+    ports:
+      - "${MYSQL_PORT}:3306"
+
+  slave1:
+    container_name: mysql-slave1
+    image: service-mysql-cluster:${MYSQL_VERSION}
+    environment:
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - TZ=${TIMEZONE}
+    volumes:
+      - ${MYSQL_HOST_SLAVE1_DATA_PATH}:${MYSQL_CONTAINER_DATA_PATH}
+      - ${MYSQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
+      - ./conf/slave1.cnf:/etc/mysql/conf.d/my.cnf
+    # 降低mysql容器的内存占用
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 26677
+        hard: 46677
+    ports:
+      - "${MYSQL_PORT}:3306"
+
